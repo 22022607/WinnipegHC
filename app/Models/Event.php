@@ -30,7 +30,8 @@ class Event extends Model
         'category',
         'duration',
         'location',
-        'user_id'
+        'user_id',
+        'registartion_url'
 ];
     protected $casts = [
     'date' => 'datetime',
@@ -40,7 +41,7 @@ class Event extends Model
 
 public function tickets()
 {
-    return $this->hasOne(Ticket::class,'event_id','id');
+    return $this->hasOne(Ticket::class);
 }
 protected static function boot()
 {
@@ -53,5 +54,9 @@ protected static function boot()
 public function eventtickets()
 {
     return $this->hasMany(Ticket::class,'event_id','id');
+}
+public function eventOrganizer()
+{
+    return $this->hasOne(MembershipUser::class,'id','user_id');
 }
 }

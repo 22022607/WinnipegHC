@@ -9,7 +9,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-       $orders= Order::with('event','ticket')->get();
+       $orders= Order::where('type','event_ticket')->with('event','ticket','user')->get();
         return view('order.index',compact('orders'));
     }
 }

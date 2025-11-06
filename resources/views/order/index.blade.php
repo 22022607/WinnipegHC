@@ -10,13 +10,13 @@
     
 }
 </style>
-<div class="container mt-4">
+<div class="container mt-4" style="margin-left: 180px">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="h4">Orders</h2>
      
     </div>
 
-    {{-- @if($events->count()) --}}
+    @if($orders->count() > 0)
         <div class="table-responsive">
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-light text-white text-sm ">
@@ -32,6 +32,7 @@
                     </tr>
                 </thead>
                 <tbody class="text-sm">
+                    
                         @foreach($orders as $key => $order)
                             <tr>
                                 <td>{{ ++$key }}</td>
@@ -52,6 +53,9 @@
                 </tbody>
             </table>
         </div>
+    @else
+        <p>No orders found.</p>
+    @endif
    
 </div>
 @endsection

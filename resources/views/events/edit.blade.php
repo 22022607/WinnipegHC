@@ -4,7 +4,7 @@
 {{-- @php
 dd($event);
 @endphp --}}
-<form method="POST" action="{{ route('events.update', $event->id)}}">
+<form method="POST" action="{{ route('events.update', $event->id)}}" enctype="multipart/form-data">
     @csrf
     @if(isset($event->id)) @method('POST') @endif
           <!-- Title -->
@@ -130,10 +130,10 @@ dd($event);
                             <label for="image" class="form-label">Event Image</label>
                             <input type="file" id="image" name="image" class="form-control" accept="image/*">
                             @if(isset($event) && $event->image)
-                                <img src="{{ asset('storage/' . $event->image) }}" alt="Event Image" class="mt-2" style="max-width: 100%; height: auto;">
+                                <img src="{{ asset($event->image) }}" alt="Event Image" class="mt-2" style="max-width: 50%; height: 20%;">
                             @endif
                         </div>
 
-        <button type="submit"  class="btn btn-primary">Save</button>
-</form>
-@endsection
+                        <button type="submit"  class="btn btn-primary">Save</button>
+                    </form>
+                    @endsection

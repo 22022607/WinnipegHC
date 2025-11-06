@@ -20,6 +20,14 @@ return new class extends Migration
             $table->enum('membership_type', ['yearly', 'lifetime']);
             $table->text('interests')->nullable();
             $table->boolean('terms')->default(false);
+            $table->timestamp('last_login_at')->nullable();
+            $table->string('last_login_ip')->nullable();
+            $table->timestamp('previous_login_at')->nullable();
+            $table->string('previous_login_ip')->nullable();
+            $table->timestamp('password_changed_at')->nullable();
+            $table->timestamp('last_active_at')->nullable();
+            $table->timestamp('dormant_until')->nullable();
+            $table->longText('password');
             $table->timestamps();
         });
     }

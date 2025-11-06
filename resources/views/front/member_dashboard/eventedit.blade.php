@@ -8,14 +8,22 @@
 
   <main class="max-w-4xl mx-auto px-6 py-8">
     <!-- Back Button -->
-    <a href="{{ route('front.memberdashboard') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6">
+    <a href="{{ route('memberdashboard') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6">
       ← Back to Events
     </a>
 
     <!-- Page Title -->
+    <div class="mb-8 flex items-center justify-between flex-wrap gap-3">
     <div class="mb-8">
       <h1 class="text-3xl font-bold mb-2">Edit Event</h1>
       <p class="text-gray-500">Set up your event or workshop with ticketing options</p>
+    </div>
+     <div class="flex gap-3">
+        <button type="submit" form="editeventForm" name="action" value="publish" 
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          Publish Event
+        </button>
+      </div>
     </div>
 
     <!-- Tabs -->
@@ -30,7 +38,7 @@
       <!-- Basic Info -->
       <div id="basic" class="tab-content active space-y-6">
         <div class="bg-white shadow rounded-lg p-6">
-        <form action="{{ route('front.event.update',$event->id) }}" method="post">
+        <form id="editeventForm" action="{{ route('memberdashboard.events.update',$event->id) }}" method="post">
             @csrf
           <h2 class="text-lg font-semibold mb-1">Event Details</h2>
           <p class="text-sm text-gray-500 mb-4">Basic information about your event</p>
@@ -86,82 +94,107 @@
             <label class="block mb-1 text-sm font-medium">Venue/Location</label>
             <input type="text" name="location" value="{{ old('location', $event->location ?? '') }}" class="w-full border rounded-lg p-2" placeholder="Studio A, Main Hall, Zoom" />
           </div>
+          
           <div>
             <label class="block mb-1 text-sm font-medium">Full Address</label>
             <textarea name="address"  class="w-full border rounded-lg p-2" rows="2" placeholder="123 Wellness Street, City, ZIP">{{ old('venue', $event->venue ?? '') }}</textarea>
           </div>
-           
+           <hr class="my-4" />
+
+            <!-- 🖼️ Event Image Upload -->
+            <h3 class="text-lg font-semibold mb-2">Event Image</h3>
+            <div class="mb-4">
+                <label class="block mb-1 text-sm font-medium">Upload Event Banner or Image</label>
+                <input type="file" name="image" accept="image/*" class="w-full border rounded-lg p-2 bg-gray-50" />
+                <img src="{{ asset($event->image ?? '') }}" alt="" height="25%" width="25%">
+
+                <p class="text-sm text-gray-500 mt-1">Supported formats: JPG, PNG, WEBP (Max size: 2MB)</p>
+            </div>
+
+        <hr class="my-4" />
+
+        <!-- 💰 Admission Fee -->
+        
+            <div class="mb-4">
+                <label class="block mb-1 text-sm font-medium">Admission Fee</label>
+                <input type="number" value="{{ old('admission_fee', $event->admission_fee ?? '') }}" name="admission_fee" class="w-full border rounded-lg p-2" placeholder="e.g., 25.00" />
+
+            </div>
         </div>
       </div>
 
       <!-- Tickets -->
-<div id="tickets" class="tab-content space-y-6">
-        <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-lg font-semibold mb-1">Ticketing Options</h2>
-        <p class="text-sm text-gray-500 mb-4">Configure how attendees can register and pay</p>
+  <div id="tickets" class="tab-content space-y-6">
+          <div class="bg-white shadow rounded-lg p-6">
+          <h2 class="text-lg font-semibold mb-1">Ticketing Options</h2>
+          <p class="text-sm text-gray-500 mb-4">Configure how attendees can register and pay</p>
 
-        <!-- Ticketing Option Selector -->
-        <div class="grid md:grid-cols-2 gap-4">
-        <label class="border rounded-lg p-4 cursor-pointer flex items-start space-x-2">
-            <input type="radio" name="ticket_type" value="internal" class="mt-1" checked
-                onclick="toggleTicketing('internal')" />
-            <div>
-            <h3 class="font-medium">Internal Ticketing</h3>
-            <p class="text-sm text-gray-500">Sell tickets directly through our platform. We'll handle payments and registrations.</p>
-            </div>
-        </label>
+          <!-- Ticketing Option Selector -->
+          <div class="grid md:grid-cols-2 gap-4">
+          <label class="border rounded-lg p-4 cursor-pointer flex items-start space-x-2">
+              <input type="radio" name="ticket_type" value="internal" class="mt-1"
+                onclick="toggleTicketing('internal')"
+                @if(@$event->tickets->ticket_type=='internal') checked @endif />
 
-        <label class="border rounded-lg p-4 cursor-pointer flex items-start space-x-2">
-            <input type="radio" name="ticket_type" value="external" class="mt-1"
-                onclick="toggleTicketing('external')" />
-            <div>
-            <h3 class="font-medium">External Ticketing</h3>
-            <p class="text-sm text-gray-500">Link to Eventbrite, Facebook Events, or your own system.</p>
-            </div>
-        </label>
-        </div>
+              <div>
+              <h3 class="font-medium">Internal Ticketing</h3>
+              <p class="text-sm text-gray-500">Sell tickets directly through our platform. We'll handle payments and registrations.</p>
+              </div>
+          </label>
 
-        <!-- Internal Ticket Configuration -->
-        <div id="internal-fields" class="mt-6 space-y-4">
-        <h3 class="font-semibold text-gray-700">Internal Ticket Configuration</h3>
-        <label class="block text-sm font-medium">Ticket Price</label>
-        <input type="number" name="ticket_price" value="{{ $event->tickets->price }}" class="w-full border rounded-lg p-2" placeholder="0.00" />
+          <label class="border rounded-lg p-4 cursor-pointer flex items-start space-x-2">
+              <input type="radio" name="ticket_type" value="external" class="mt-1"
+                onclick="toggleTicketing('external')"
+                @if(@$event->tickets->ticket_type=='external') checked @endif />
 
-        <label class="block text-sm font-medium">Max Attendees</label>
-        <input type="number" name="max_attendees" value="{{ @$event->tickets->attendees }}" class="w-full border rounded-lg p-2" placeholder="20" />
+              <div>
+              <h3 class="font-medium">External Ticketing</h3>
+              <p class="text-sm text-gray-500">Link to Eventbrite, Facebook Events, or your own system.</p>
+              </div>
+          </label>
+          </div>
 
-        <label class="block text-sm font-medium">Early Bird Price (Optional)</label>
-        <input type="number" name="early_price" value="{{ @$event->tickets->early_bird_price }}" class="w-full border rounded-lg p-2" placeholder="0.00" />
+          <!-- Internal Ticket Configuration -->
+          <div id="internal-fields" class="mt-6 space-y-4">
+          <h3 class="font-semibold text-gray-700">Internal Ticket Configuration</h3>
+          <label class="block text-sm font-medium">Ticket Price</label>
+          <input type="number" name="ticket_price" value="{{ @$event->tickets->price }}" class="w-full border rounded-lg p-2" placeholder="0.00" />
 
-        <label class="block text-sm font-medium">Ticket Sales Start</label>
-        <input type="datetime-local" 
-        value="{{ $event->tickets && $event->tickets->ticket_sale_start ? $event->tickets->ticket_sale_start->format('Y-m-d\TH:i') : '' }}" 
-        name="sales_start" 
-        class="w-full border rounded-lg p-2" />
+          <label class="block text-sm font-medium">Max Attendees</label>
+          <input type="number" name="max_attendees" value="{{ @$event->tickets->attendees }}" class="w-full border rounded-lg p-2" placeholder="20" />
 
-        <label class="block text-sm font-medium">Ticket Sales End</label>
-        <input type="datetime-local" 
-        value="{{ $event->tickets && $event->tickets->ticket_sale_end ? $event->tickets->ticket_sale_end->format('Y-m-d\TH:i') : '' }}" 
-        name="sales_end" 
-        class="w-full border rounded-lg p-2" />
+          <label class="block text-sm font-medium">Early Bird Price (Optional)</label>
+          <input type="number" name="early_price" value="{{ @$event->tickets->early_bird_price }}" class="w-full border rounded-lg p-2" placeholder="0.00" />
 
-        <div class="flex items-center space-x-2">
-            <input type="checkbox" name="manual_approval" class="h-4 w-4" />
-            <span class="text-sm text-gray-600">Require Manual Approval</span>
-        </div>
-        </div>
+          <label class="block text-sm font-medium">Ticket Sales Start</label>
+          <input type="datetime-local" 
+          value="{{ $event->tickets && $event->tickets->ticket_sale_start ?? '' }}" 
+          name="sales_start" 
+          class="w-full border rounded-lg p-2" />
 
-        <!-- External Ticket Configuration -->
-        <div id="external-fields" class="mt-6 space-y-4 hidden">
-        <h3 class="font-semibold text-gray-700">External Ticket Link</h3>
-        <label class="block text-sm font-medium">Ticket/Registration URL</label>
-        <input type="url" name="ticket_url" class="w-full border rounded-lg p-2" placeholder="https://eventbrite.com/your-event" />
+          <label class="block text-sm font-medium">Ticket Sales End</label>
+          <input type="datetime-local" 
+          value="{{ $event->tickets && $event->tickets->ticket_sale_end ?? '' }}" 
+          name="sales_end" 
+          class="w-full border rounded-lg p-2" />
 
-        <label class="block text-sm font-medium">Platform Name</label>
-        <input type="text" name="platform_name" class="w-full border rounded-lg p-2" placeholder="Eventbrite, Facebook Events, etc." />
-        </div>
+          <div class="flex items-center space-x-2">
+              <input type="checkbox" name="manual_approval" class="h-4 w-4" />
+              <span class="text-sm text-gray-600">Require Manual Approval</span>
+          </div>
+          </div>
+
+          <!-- External Ticket Configuration -->
+          <div id="external-fields" class="mt-6 space-y-4 hidden">
+          <h3 class="font-semibold text-gray-700">External Ticket Link</h3>
+          <label class="block text-sm font-medium">Ticket/Registration URL</label>
+          <input type="text" value="{{ $event->tickets->registration_url ?? '' }}" name="registration_url" class="w-full border rounded-lg p-2" placeholder="https://eventbrite.com/your-event" />
+
+          <label class="block text-sm font-medium">Platform Name</label>
+          <input type="text" value="{{ $event->tickets->platform_name ?? '' }}" name="platform_name" class="w-full border rounded-lg p-2" placeholder="Eventbrite, Facebook Events, etc." />
+          </div>
+    </div>
   </div>
-</div>
 
 
 
@@ -191,7 +224,7 @@
             </div>
             <div>
               <label class="block mb-1 text-sm font-medium">Contact Phone</label>
-              <input type="tel" name="phone_number" value="{{ old('venue', $event->contact ?? '') }}" class="w-full border rounded-lg p-2" placeholder="(555) 123-4567" />
+              <input type="tel" name="contact" value="{{ old('venue', $event->contact ?? '') }}" class="w-full border rounded-lg p-2" placeholder="(555) 123-4567" />
             </div>
           </div>
         </div>
@@ -208,17 +241,14 @@
             <p class="text-gray-600 mb-4">
               {{ $event->description }}
             </p>
-            <div class="flex items-center justify-between">
-              <span class="text-2xl font-bold">${{ $event->tickets->price }}</span>
-              <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">Register Now</button>
-            </div>
+            
           </div>
         </div>
 
-        <div class="flex gap-4">
-          <button type="submit" class="flex-1 px-4 py-2 border rounded-lg">Save as Draft</button>
-          <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg">Publish Event</button>
-        </div>
+        <!--<div class="flex gap-4">-->
+        <!--  <button type="submit" class="flex-1 px-4 py-2 border rounded-lg">Save as Draft</button>-->
+        <!--  <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg">Publish Event</button>-->
+        <!--</div>-->
          </form>
       </div>
     </div>
@@ -228,32 +258,38 @@
  @include('front.layout.footer')
 
 <script>
-    // Tab switching logic
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+  // Tab switching logic
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
 
-    tabButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        // Remove active state from all buttons
-        tabButtons.forEach(btn => btn.classList.remove('border-blue-500', 'text-blue-600'));
-        tabButtons.forEach(btn => btn.classList.add('text-gray-600'));
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      tabButtons.forEach(btn => btn.classList.remove('border-blue-500', 'text-blue-600'));
+      tabButtons.forEach(btn => btn.classList.add('text-gray-600'));
 
-        // Add active state to clicked button
-        button.classList.add('border-blue-500', 'text-blue-600');
-        button.classList.remove('text-gray-600');
+      button.classList.add('border-blue-500', 'text-blue-600');
+      button.classList.remove('text-gray-600');
 
-        // Hide all tab contents
-        tabContents.forEach(tab => tab.classList.remove('active'));
+      tabContents.forEach(tab => tab.classList.remove('active'));
 
-        // Show selected tab
-        const tabId = button.getAttribute('data-tab');
-        document.getElementById(tabId).classList.add('active');
-      });
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.add('active');
     });
+  });
 
+  // Ticketing toggle logic
   function toggleTicketing(type) {
-    document.getElementById("internal-fields").classList.toggle("hidden", type !== "internal");
-    document.getElementById("external-fields").classList.toggle("hidden", type !== "external");
+    const internal = document.getElementById("internal-fields");
+    const external = document.getElementById("external-fields");
+    if (!internal || !external) return;
+
+    internal.classList.toggle("hidden", type !== "internal");
+    external.classList.toggle("hidden", type !== "external");
   }
 
-  </script>
+  // Initialize correct ticketing fields on page load
+  document.addEventListener("DOMContentLoaded", function() {
+    const selectedType = document.querySelector('input[name="ticket_type"]:checked')?.value;
+    if (selectedType) toggleTicketing(selectedType);
+  });
+</script>

@@ -18,5 +18,17 @@ class Business extends Model
         'description',
         'image',
         'featured',
+         'email',
+        'user_id',
+        'featured_image',
+        'additional_images',
+        'twitter',
+        'linkedin',
+        'instagram',
+        'facebook'
     ];
+    public function membershipUser()
+    {
+        return $this->belongsTo(MembershipUser::class, 'user_id');
+    }
 }

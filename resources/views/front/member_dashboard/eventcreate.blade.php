@@ -8,16 +8,37 @@
 
   <main class="max-w-4xl mx-auto px-6 py-8">
     <!-- Back Button -->
-    <a href="{{ route('front.memberdashboard') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6">
+    <a href="{{ route('memberdashboard') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6">
       ← Back to Events
     </a>
-
-    <!-- Page Title -->
-    <div class="mb-8">
+    <div class="mb-8 flex items-center justify-between flex-wrap gap-3">
+      <div class="mb-8">
       <h1 class="text-3xl font-bold mb-2">Create New Event</h1>
       <p class="text-gray-500">Set up your event or workshop with ticketing options</p>
     </div>
 
+      <!-- 💾 Save Changes Button -->
+     <div class="flex gap-3">
+        <button type="submit" form="eventForm" name="action" value="publish" 
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          Publish Event
+        </button>
+      </div>
+    </div>
+    <!-- Page Title -->
+   
+      
+      @if (session('error'))
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ session('error') }}
+    </div>
+@endif
+
+@if (session('status'))
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        {{ session('status') }}
+    </div>
+@endif
     <!-- Tabs -->
     <div>
       <div class="grid grid-cols-4 border-b mb-6 text-center">
@@ -29,8 +50,8 @@
 
       <!-- Basic Info -->
       <div id="basic" class="tab-content active space-y-6">
-        <div class="bg-white shadow rounded-lg p-6">
-        <form action="{{ route('front.event.store') }}" method="post">
+      <div class="bg-white shadow rounded-lg p-6">
+        <form id="eventForm" action="{{ route('memberdashboard.events.store') }}" method="post" enctype="multipart/form-data">
             @csrf
           <h2 class="text-lg font-semibold mb-1">Event Details</h2>
           <p class="text-sm text-gray-500 mb-4">Basic information about your event</p>
@@ -90,12 +111,33 @@
             <label class="block mb-1 text-sm font-medium">Full Address</label>
             <textarea name="address" class="w-full border rounded-lg p-2" rows="2" placeholder="123 Wellness Street, City, ZIP"></textarea>
           </div>
-           
+            <hr class="my-4" />
+
+            <!-- 🖼️ Event Image Upload -->
+            <h3 class="text-lg font-semibold mb-2">Event Image</h3>
+            <div class="mb-4">
+                <label class="block mb-1 text-sm font-medium">Upload Event Banner or Image</label>
+                <input type="file" name="image" accept="image/*" class="w-full border rounded-lg p-2 bg-gray-50" />
+                <p class="text-sm text-gray-500 mt-1">Supported formats: JPG, PNG, WEBP (Max size: 2MB)</p>
+            </div>
+
+        <hr class="my-4" />
+
+        <!-- 💰 Admission Fee -->
+        
+            <div class="mb-4">
+                <label class="block mb-1 text-sm font-medium">Admission Fee</label>
+                <input type="number" name="admission_fee" class="w-full border rounded-lg p-2" placeholder="e.g., 25.00" />
+
+            </div>
+            
+       
+          
         </div>
       </div>
 
       <!-- Tickets -->
-<div id="tickets" class="tab-content space-y-6">
+  <div id="tickets" class="tab-content space-y-6">
         <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-lg font-semibold mb-1">Ticketing Options</h2>
         <p class="text-sm text-gray-500 mb-4">Configure how attendees can register and pay</p>
@@ -152,7 +194,7 @@
         <input type="url" name="ticket_url" class="w-full border rounded-lg p-2" placeholder="https://eventbrite.com/your-event" />
 
         <label class="block text-sm font-medium">Platform Name</label>
-        <input type="text" name="platform_name" class="w-full border rounded-lg p-2" placeholder="Eventbrite, Facebook Events, etc." />
+        <input type="text" name="registration_url" class="w-full border rounded-lg p-2" placeholder="Eventbrite, Facebook Events, etc." />
         </div>
   </div>
 </div>
@@ -198,21 +240,21 @@
           <p class="text-sm text-gray-500 mb-4">How your event will appear</p>
 
           <div class="border rounded-lg p-6 bg-white">
-            <h2 class="text-2xl font-bold mb-2">Meditation Workshop</h2>
-            <p class="text-gray-600 mb-4">
-              Join us for a peaceful meditation workshop where you'll learn mindfulness and inner peace.
+            <h2 id="preview-title" class="text-2xl font-bold mb-2">Your Event Title</h2>
+            <p id="preview-description" class="text-gray-600 mb-4">
+              Event description will appear here.
             </p>
             <div class="flex items-center justify-between">
-              <span class="text-2xl font-bold">$35</span>
-              <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">Register Now</button>
+              <span id="preview-fee" class="text-2xl font-bold">Event Admission fee</span>
+             
             </div>
           </div>
         </div>
 
-        <div class="flex gap-4">
+        {{-- <div class="flex gap-4">
           <button type="submit" class="flex-1 px-4 py-2 border rounded-lg">Save as Draft</button>
           <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg">Publish Event</button>
-        </div>
+        </div> --}}
          </form>
       </div>
     </div>
@@ -249,5 +291,33 @@
     document.getElementById("internal-fields").classList.toggle("hidden", type !== "internal");
     document.getElementById("external-fields").classList.toggle("hidden", type !== "external");
   }
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Grab input elements
+    const titleInput = document.querySelector('input[name="title"]');
+    const descriptionInput = document.querySelector('textarea[name="description"]');
+    const feeInput = document.querySelector('input[name="admission_fee"]');
+
+    // Grab preview elements
+    const previewTitle = document.querySelector("#preview-title");
+    const previewDescription = document.querySelector("#preview-description");
+    const previewFee = document.querySelector("#preview-fee");
+
+    // Update functions
+    titleInput.addEventListener("input", () => {
+        previewTitle.textContent = titleInput.value || "Your Event Title";
+    });
+
+    descriptionInput.addEventListener("input", () => {
+        previewDescription.textContent = descriptionInput.value || "Event description will appear here.";
+    });
+
+    feeInput.addEventListener("input", () => {
+        previewFee.textContent = feeInput.value 
+            ? `$${parseFloat(feeInput.value).toFixed(2)}`
+            : "$0.00";
+    });
+});
+
 
   </script>

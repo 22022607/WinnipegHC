@@ -9,6 +9,17 @@
 
 </head>
 <body class="flex flex-col min-h-screen bg-gradient-to-b from-purple-50 to-white">
+@if (session('status'))
+<script>
+    alert('{{ session('status') }}');
+</script>
+@endif
+
+@if ($errors->any())
+<script>
+    alert('{{ $errors->first() }}');
+</script>
+@endif
 
 
   <!-- Forgot Password Form -->
@@ -17,16 +28,17 @@
       <h2 class="text-center text-2xl font-bold text-gray-800">Forgot Password?</h2>
       <p class="text-center text-gray-500 mb-6">Enter your email address and we’ll send you a link to reset your password.</p>
 
-      <form action="#" method="POST" class="space-y-4">
+      <form action="{{ url('forget-password') }}" method="POST" class="space-y-4">
+        @csrf
         <div>
           <label class="block text-gray-600 mb-1">Email Address</label>
-          <input type="email" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter your email" required>
+          <input type="email" name="email" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter your email" required>
         </div>
         <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700">Send Reset Link</button>
       </form>
 
       <p class="text-center text-sm text-gray-600 mt-4">
-        Remembered your password? <a href="{{ route('front.login') }}" class="text-purple-600 hover:underline">Back to Login</a>
+        Remembered your password? <a href="{{ url('login') }}" class="text-purple-600 hover:underline">Back to Login</a>
       </p>
     </div>
   </main>

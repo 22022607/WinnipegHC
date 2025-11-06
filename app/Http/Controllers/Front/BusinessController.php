@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Business;
+use App\Models\Category;
+use App\Models\BusinessAppointment;
 
 class BusinessController extends Controller
 {
@@ -12,23 +15,7 @@ class BusinessController extends Controller
         $categories = [];
         $locations = [];
 
-        $businesses = collect([
-            [
-                'id' => 1,
-                'name' => 'ShantiLotus Healing Services',
-                'category' => 'Energy Healing and Reiki',
-                'location' => 'Downtown Winnipeg',
-                'rating' => 4.9,
-                'reviews' => 42,
-                'phone' => '(204) 555-0123',
-                'website' => 'shantilotus.ca',
-                'hours' => 'Mon-Fri 9AM-6PM',
-                'description' => 'Holistic healing center offering Reiki, crystal therapy, and meditation sessions.',
-                'image' => 'https://images.unsplash.com/photo-1518611012118-696072aa579a?...',
-                'featured' => true,
-            ],
-            // ... other businesses
-        ]);
+        $businesses = Business::get();
 
         // Apply filters
         $filtered = $businesses->filter(function($biz) use ($request) {
@@ -42,7 +29,7 @@ class BusinessController extends Controller
         });
 
         return view('front.business.index', [
-            'businesses' => $filtered,
+            'businesses' => $businesses,
             'categories' => $categories,
             'locations' => $locations,
         ]);
@@ -51,6 +38,63 @@ class BusinessController extends Controller
     public function show($id)
     {
         // show single business profile
+    }
+    public function details($id)
+    {
+        $business = Business::with('membershipUser')->find($id);
+   
+        return view('front.business.details', compact('business'));
+    }
+   
+    public function businessCategory()
+    {
+        $categories = Category::select('id', 'name')->orderBy('id', 'asc')->get();
+        return view ('front.business.category',compact('categories'));
+    }
+     public function bookAppointment(Request $request, $id)
+    {
+        // dd($id);
+        try {
+            $business = Business::findOrFail($id);
+
+            // Validate form input
+            $validated = $request->validate([
+                // 'service'    => 'required|string|max:255',
+                'date'       => 'required',
+                'appointment_time'       => 'required|string',
+                'firstName'  => 'required|string|max:255',
+                // 'lastName'   => 'required|string|max:255',
+                'email'      => 'required|email',
+                'phone'      => 'required|string|max:20',
+                'notes'      => 'nullable|string',
+            ]);
+
+            // Save booking
+            BusinessAppointment::create([
+                'business_id' => $business->id,
+                'date'        => $validated['date'],
+                'appointment_time'        => $validated['appointment_time'],
+                'first_name'  => $validated['firstName'],
+                'last_name'   => $request->last_name,
+                'email'       => $validated['email'],
+                'phone'       => $validated['phone'],
+                'notes'       => $validated['notes'] ?? null,
+                'status'      => 'pending',
+            ]);
+
+            return redirect()->back()->with('success', 'Appointment booked successfully! We will contact you soon.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator)->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Booking failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+
+            return redirect()->back()->with('error', 'Something went wrong while booking your appointment. Please try again.');
+        }
     }
 }
 

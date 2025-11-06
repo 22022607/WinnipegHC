@@ -19,6 +19,16 @@ class Ticket extends Model
         'ticket_sale_start',
         'ticket_sale_end',
         'registration_url',
-        'platform_name'
+        'platform_name',
+        'ticket_type'
     ];
+     public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id');
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Order::class, 'ticket_id');
+    }
 }

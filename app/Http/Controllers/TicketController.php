@@ -39,6 +39,8 @@ class TicketController extends Controller
             'name'=>$request->name,
             'quantity'=>$request->quantity,
             'price'=>$request->price,
+            'type'=>'event_ticket',
+
         ]);
         // dd($ticket);
         $qr = QrCode::size(250)->generate(route('ticket.show', $tickets->id));
@@ -53,7 +55,7 @@ class TicketController extends Controller
         // $tickets='';
         // $event_id = Event::where('id',$eventId)->get();
         // dd($event_id);
-        $tickets  = Ticket::where('event_id',$eventId)->get();
+        $tickets  = Ticket::where('event_id',$eventId)->first();
         // dd($tickets);
         // $qr = QrCode::size(250)->generate(route('ticket.show', $tickets->id));
         return view('tickets.show',compact('eventId','tickets'));

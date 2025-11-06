@@ -30,8 +30,8 @@
 
     {{-- Download PDF --}}
     <div class="mt-6 text-center">
-        <a href="{{ route('front.ticket.download',$order->id) }}"
-           class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold shadow-md">
+        <a href="{{ route('ticket.download',$order->id) }}"
+           class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold shadow-md">
             ⬇️ Download Ticket (PDF)
         </a>
     </div>

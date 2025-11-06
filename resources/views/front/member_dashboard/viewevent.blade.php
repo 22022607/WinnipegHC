@@ -2,7 +2,7 @@
 
 <div class="max-w-5xl mx-auto px-6 py-10">
      <div class="flex gap-4">
-        <a href="{{ route('front.event.manage') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6">
+        <a href="{{ route('memberdashboard.events.manage') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6">
       ← Back to Events
     </a>
 

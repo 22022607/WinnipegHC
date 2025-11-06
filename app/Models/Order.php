@@ -14,7 +14,12 @@ class Order extends Model
         'price',
         'quantity',
         'status',
-        'ticket_code'
+        'ticket_code',
+        'name',
+        'email',
+        'contact',
+        'type'
+       
        
     ];
     public function event()
@@ -24,5 +29,13 @@ class Order extends Model
      public function ticket()
     {
         return $this->hasOne(Ticket::class,'id','ticket_id');
+    }
+     public function user()
+    {
+        return $this->hasOne(MembershipUser::class,'id','user_id');
+    }
+     public function exhibitor()
+    {
+        return $this->hasOne(Exhibitor::class,'id','user_id');
     }
 }
